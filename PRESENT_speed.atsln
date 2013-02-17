@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Atmel Studio Solution File, Format Version 11.00
+Project("{18226A42-8477-4023-8AD2-40C49DA407C9}") = "PRESENT_speed", "PRESENT_speed\PRESENT_speed.asmproj", "{6BD6A432-F9B6-4443-A0AD-8D1BB8EB035F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AVR = Debug|AVR
+		Release|AVR = Release|AVR
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6BD6A432-F9B6-4443-A0AD-8D1BB8EB035F}.Debug|AVR.ActiveCfg = Debug|AVR
+		{6BD6A432-F9B6-4443-A0AD-8D1BB8EB035F}.Debug|AVR.Build.0 = Debug|AVR
+		{6BD6A432-F9B6-4443-A0AD-8D1BB8EB035F}.Release|AVR.ActiveCfg = Release|AVR
+		{6BD6A432-F9B6-4443-A0AD-8D1BB8EB035F}.Release|AVR.Build.0 = Release|AVR
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
