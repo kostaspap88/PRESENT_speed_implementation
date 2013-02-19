@@ -1,0 +1,28 @@
+<ASSEMBLER_INFO>
+ <VERSION>2.1.52</VERSION>
+ <DEVICE>"ATtiny45"</DEVICE>
+ <WORKING_DIR>C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\Debug</WORKING_DIR>
+ <INCLUDE_PATH>
+  <DIR>C:\Program Files (x86)\Atmel\Atmel Studio 6.0\extensions\Atmel\AVRAssembler\2.1.51.64\AvrAssembler/Include</DIR>
+ </INCLUDE_PATH>
+ <SOURCE_FILE>C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_speed.asm</SOURCE_FILE>
+ <INCLUDED_FILES>
+  <FILE>C:\Program Files (x86)\Atmel\Atmel Studio 6.0\extensions\Atmel\AVRAssembler\2.1.51.64\AvrAssembler/Include\tn45def.inc</FILE>
+ </INCLUDED_FILES>
+ <OBJECT_FILES>
+  <FILE>C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\Debug/PRESENT_speed.obj</FILE>
+ </OBJECT_FILES>
+ <HEX_FILES>
+  <FILE>C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\Debug/PRESENT_speed.hex</FILE>
+ </HEX_FILES>
+ <OUTPUT_FILES>
+  <FILE>C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\Debug\PRESENT_speed.map</FILE>
+  <FILE>C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\Debug\PRESENT_speed.lss</FILE>
+ </OUTPUT_FILES>
+ <LABELS>
+  <sbox_pmt_3><FILE>C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_speed.asm</FILE><LINE>33</LINE></sbox_pmt_3>
+  <sbox_pmt_2><FILE>C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_speed.asm</FILE><LINE>51</LINE></sbox_pmt_2>
+  <sbox_pmt_1><FILE>C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_speed.asm</FILE><LINE>69</LINE></sbox_pmt_1>
+  <sbox_pmt_0><FILE>C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_speed.asm</FILE><LINE>87</LINE></sbox_pmt_0>
+ </LABELS>
+</ASSEMBLER_INFO>

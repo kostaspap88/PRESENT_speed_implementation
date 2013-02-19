@@ -10,20 +10,22 @@
  *		Radboud University Nijmegen, Kerckhoff's Institute
  *
  *		Speed Optimizations:
- *		<to be completed>
+ *		<list to be completed>
  */ 
 
  .include "tn45def.inc"
 
- /* 
-  * Use lookup tables that combine the cipher's SBox and Player.
-  *	Originally created and developed by Bo Zhu and Zheng Gong, bo.zhu@uwaterloo.ca, cis.gong@gmail.com
-  * [http://cis.sjtu.edu.cn/index.php/Software_Implementation_of_Block_Cipher_PRESENT_for_8-Bit_Platforms]
-  */
+
 
  
 /* Start at a position high in memory, make sure that code doesn't reach it. */
-.org 0x03E8
+.org 0x0300
+
+/* 
+ * Use lookup tables that combine the cipher's SBox and Player.
+ *	Originally created and developed by Bo Zhu and Zheng Gong, bo.zhu@uwaterloo.ca, cis.gong@gmail.com
+ * [http://cis.sjtu.edu.cn/index.php/Software_Implementation_of_Block_Cipher_PRESENT_for_8-Bit_Platforms]
+ */
 
 /* Care: Each .db directive must use an EVEN number (namely 8) of arguments s.t. we don't waste memory
    [.db 0xFF stores 1 byte in 1 word, so we prefer .db 0xFF 0xFF, i.e. 2 bytes in 1 word] */
@@ -102,11 +104,274 @@ sbox_pmt_0:
 
 .org 0x00
 
-ldi ZL, low(2*sbox_pmt_2+2)
-ldi ZH, high(2*sbox_pmt_2+2)
+/* We store the current state [64 bits] in registers r0 until r7 
+   because we only load them once and then only operate on them. */
+
+//BEGIN: load current state with dummy values
+ldi r16,0x12
+ldi r17,0x33
+ldi r18,0x0A
+ldi r19,0x1B
+ldi r20,0xFF
+ldi r21,0x90
+ldi r22,0xFE
+ldi r23,0x01
+
+mov r0,r16
+mov r1,r17
+mov r2,r18
+mov r3,r19
+mov r4,r20
+mov r5,r21
+mov r6,r22
+mov r7,r23
+//END: load current state with dummy values
+
+
+// Quest: Is x+x better than 2*x  or than <<? 
+
+
+/* Technique: Load sbox_pmt table address to Z and fetch */
+
+/* CARE: In order to avoid loading to ZL the sbox_pmt_3+sbox_pmt_3 = ldi + add = 2cc,
+ * we directly load the value 0x60 = 1cc .
+ * One more thing: in order to avoid loading ZH everytime we lookup elsewhere, we start the tables at 
+ * address 0x0600 (so .org 0x0300 for word address) and e.g. table 3 starts at 0x0600 and ends at 0x0600+0xFF
+ * Now, we only have to change ZL before looking up in the same table. We change ZH only when moving to a different table.
+ * Last, in order to avoid changing ZH, we first do all table3 lookups, then all table2 lookups,...
+ */
+
+/* Lookup Table 3 */
+ldi ZH, 0x06
+mov ZL, r0
 lpm r16, Z
 
+mov ZL,r4
+lpm r20,Z
+
+mov ZL,r1
+lpm r25,Z
+
+mov ZL,r5
+lpm r29,Z
+
+/* Lookup Table 2 */
+ldi ZH, 0x07
+mov ZL, r1
+lpm r17,Z
+
+mov ZL, r5
+lpm r21,Z
+
+mov ZL, r2
+lpm r26, Z
+
+mov ZL, r6
+/* Now here it looks like we are out of registers [cause r30,r31 are Z]. I have r8...r15 and FORTUNATELY I CAN lpm on them. 
+ * We use register8 as register30 and register9 as register31.
+ */
+lpm r8, Z
+
+/* Lookup Table 1 */
+ldi ZH, 0x08
+mov ZL, r2
+lpm r18,Z
+
+mov ZL, r6
+lpm r22, Z
+
+mov ZL,r3
+lpm r27,Z
+
+mov ZL,r7
+/* r9 instead of r31, as mentioned above */
+lpm r9,Z
+
+/* Lookup Table 0 */
+ldi ZH, 0x09
+mov ZL,r3
+lpm r19,Z
+
+mov ZL,r7
+lpm r23,Z
+
+mov ZL,r0
+lpm r24,Z
+
+mov ZL,r4
+lpm r28,Z
+
+/* Now, I no longer need Z=(r30, r31), so move r8, r9 there s.t. I can imediately and/or them in following code */
+mov r30,r8
+mov r31, r9
+
+/* The results[LOW] are stored in | r16, r17, r18, r19 | r20, r21, r22, r23 | r24, r25, r26, r27 | r28, r29, r30, r31 | */
+/* Perform the AND/OR operations to combine to a new state[LOW] */
+
+andi r16,0xC0
+andi r17,0x30
+andi r18,0x0C
+andi r19,0x03
+
+or r16,r17
+or r16,r18
+or r16,r19
+
+andi r20,0xC0
+andi r21,0x30
+andi r22,0x0C
+andi r23,0x03
+
+or r20,r21
+or r20,r22
+or r20,r23
+
+andi r24,0xC0
+andi r25,0x30
+andi r26,0x0C
+andi r27,0x03
+
+or r24,r25
+or r24,r26
+or r24,r27
+
+andi r28,0xC0
+andi r29,0x30
+andi r30,0x0C
+andi r31,0x03
+
+or r28,r29
+or r28,r30
+or r28,r31
+
+/* The low half of the new state is stored in r16, r20, r24 , r28 
+ * and we move them to the unused registers r8, r9 ,r10, r11
+ */
+
+ mov r8,r16
+ mov r9,r20
+ mov r10,r24
+ mov r11,r28
+
+ /* Now we are officially out of registers, do the procedure once again [modified for the high state ofc] 
+ to calculate the high half of the new state */
+
+ /* Lookup Table 3 */
+
+ ldi ZH,0x06
+ mov ZL,r2
+ lpm r18,Z
+
+ mov ZL,r6
+ lpm r22,Z
+
+ mov ZL,r3
+ lpm r27,Z
+
+ mov ZL,r7
+ /* Instead of r31, we use r15 */
+ lpm r15,Z
+
+ /* Lookup Table 2 */
+
+ ldi ZH,0x07
+ mov ZL,r3
+ lpm r19,Z
+
+ mov ZL,r7
+ lpm r23,Z
+
+ mov ZL,r0
+ lpm r24,Z
+
+ mov ZL,r4
+ lpm r28,Z
+
+/* Lookup Table 1 */
+
+ ldi ZH,0x08
+ mov ZL,r0
+ lpm r16,Z
+
+ mov ZL,r4
+ lpm r20,Z
+
+ mov ZL,r1
+ lpm r25,Z
+
+ mov ZL,r5
+ lpm r29,Z
+
+/* Lookup Table 0 */
+
+ ldi ZH,0x09
+ mov ZL,r1
+ lpm r17,Z
+
+ mov ZL,r5
+ lpm r21,Z
+
+ mov ZL,r2
+ lpm r26,Z
+
+ mov ZL,r6
+ /* Instead of r30, we use r14 */
+ /* Although we don't need Z anymore, we avoid doing lpm r30, Z  [to gain 1cc] because it is UNDEFINED
+    and I'm kinda afraid - WILL CHECK AGAIN [perhaps only lpm r30,Z+ is undefined] */
+ lpm r14,Z
+
+ 
+/* Now, I no longer need Z=(r30, r31), so move r14, r15 there s.t. I can imediately and/or them in following code */
+mov r30,r14
+mov r31, r15
+
+/* The results[HIGH]are stored in | r16, r17, r18, r19 | r20, r21, r22, r23 | r24, r25, r26, r27 | r28, r29, r30, r31 | */
+/* Perform the AND/OR operations to combine to a new state[HIGH] */
+
+andi r16,0xC0
+andi r17,0x30
+andi r18,0x0C
+andi r19,0x03
+
+or r16,r17
+or r16,r18
+or r16,r19
+
+andi r20,0xC0
+andi r21,0x30
+andi r22,0x0C
+andi r23,0x03
+
+or r20,r21
+or r20,r22
+or r20,r23
+
+andi r24,0xC0
+andi r25,0x30
+andi r26,0x0C
+andi r27,0x03
+
+or r24,r25
+or r24,r26
+or r24,r27
+
+andi r28,0xC0
+andi r29,0x30
+andi r30,0x0C
+andi r31,0x03
+
+or r28,r29
+or r28,r30
+or r28,r31
+
+/* The high half of the new state is stored in r16, r20, r24 , r28 
+ * and we move them to the unused registers r12, r13 ,r14, r15
+ */
+
+ mov r12,r16
+ mov r13,r20
+ mov r14,r24
+ mov r15,r28
 
 
-
-  
+ /* FINALLY, FULL new state [64 bits] is stored in r8, r9, ... , r15 */
