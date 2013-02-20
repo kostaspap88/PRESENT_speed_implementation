@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.1.52  C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_speed.asm Tue Feb 19 17:20:21 2013
+AVRASM ver. 2.1.52  C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_speed.asm Wed Feb 20 16:53:34 2013
 
 
 EQU  SIGNATURE_000 0000001e
@@ -443,3 +443,9 @@ CSEG sbox_pmt_3   00000300
 CSEG sbox_pmt_2   00000380
 CSEG sbox_pmt_1   00000400
 CSEG sbox_pmt_0   00000480
+CSEG sbox256      00000500
+CSEG shifted_counter 00000580
+CSEG sbox16       00000590
+CSEG LOOP_BEGINNING 00000025
+CSEG ONE_MORE_ROUND 00000113
+CSEG END          0000010a
