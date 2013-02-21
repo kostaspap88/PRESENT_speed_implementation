@@ -154,6 +154,14 @@ ldi r21,0x90
 ldi r22,0x33
 ldi r23,0x41
 
+ldi r16,0x00
+ldi r17,0x00
+ldi r18,0x00
+ldi r19,0x00
+ldi r20,0x00
+ldi r21,0x00
+ldi r22,0x00
+ldi r23,0x00
 
 
 mov r0,r16
@@ -192,6 +200,17 @@ ldi r23,0x98
 ldi r24,0x23
 ldi r25,0x40
 
+ldi r16,0x00
+ldi r17,0x00
+ldi r18,0x00
+ldi r19,0x00
+ldi r20,0x00
+ldi r21,0x00
+ldi r22,0x00
+ldi r23,0x00
+ldi r24,0x00
+ldi r25,0x00
+
 mov r8,r16
 mov r9,r17
 mov r10,r18
@@ -225,7 +244,7 @@ eor r4,r13
 eor r5,r12
 eor r6,r11
 eor r7,r10
-/* STATE is stored in r0,r1,...,r7 */
+/* XORED STATE is in r0,r1,...,r7 */
 
 /* Do the KEY UPDATE and counter increase here, key is stored in r8,r9,...,r17 */
 
@@ -309,7 +328,7 @@ ror r10
 ror r9
 or r19,r9
 
-/* key is stored in r10, r11, ... ,r19 */
+
 
 /* SBox on key bits 76,77,78,79 i.e. high part of register r19 */
 ldi ZH, 0x0A
@@ -317,25 +336,22 @@ mov ZL,r19
 lpm r19,Z
 
 
+/* key is stored in r10, r11, ... ,r19. I should probably move it back to r8,r9,r10,....,r17 */
+mov r8,r10
+mov r9,r11
+mov r10,r12
+mov r11,r13
+mov r12,r14
+mov r13,r15
+mov r14,r16
+mov r15,r17
+mov r16,r18
+mov r17,r19
 
 
 
+/* Finally, updated key is stored in r8,r9,r10,...,r17 */
 
-/* Finally, updated key is stored in r10,...,r19 */
-
-/*Push key and counter to stack [SRAM] */
-push r10
-push r11
-push r12
-push r13
-push r14
-push r15
-push r16
-push r17
-push r18
-push r19
-
-push r20
 
 // Question: Is x+x better than 2*x  or than <<? 
 
@@ -351,264 +367,228 @@ Technique: Load sbox_pmt table address to Z and fetch */
  * Last, in order to avoid changing ZH, we first do all table3 lookups, then all table2 lookups,...
  */
 
-/* Lookup Table 3 */
+/* cipher 0 */
 ldi ZH, 0x06
 mov ZL, r0
-lpm r16, Z
+lpm r21, Z
+andi r21,0xC0
 
-mov ZL,r4
-lpm r20,Z
+/* cipher 1 - use the ZH=0x06 */ 
+mov ZL, r4
+lpm r22, Z
+andi r22,0xC0
 
-mov ZL,r1
-lpm r25,Z
-
-mov ZL,r5
-lpm r29,Z
-
-/* Lookup Table 2 */
+/* cipher 0 */
 ldi ZH, 0x07
 mov ZL, r1
-lpm r17,Z
+lpm r23, Z
+andi r23,0x30
+or r21,r23
 
+/* cipher 1 */
 mov ZL, r5
-lpm r21,Z
+lpm r23, Z
+andi r23,0x30
+or r22,r23
 
-mov ZL, r2
-lpm r26, Z
-
-mov ZL, r6
-/* Now here it looks like we are out of registers [cause r30,r31 are Z]. I have r8...r15 and FORTUNATELY I CAN lpm on them. 
- * We use register8 as register30 and register9 as register31.
- */
-lpm r8, Z
-
-/* Lookup Table 1 */
+/* cipher 0 */
 ldi ZH, 0x08
 mov ZL, r2
-lpm r18,Z
+lpm r23, Z
+andi r23,0x0C
+or r21,r23
 
+/* cipher 1 */
 mov ZL, r6
-lpm r22, Z
+lpm r23, Z
+andi r23,0x0C
+or r22,r23
 
+/* cipher 0 */
+ldi ZH, 0x09
+mov ZL, r3
+lpm r23, Z
+andi r23,0x03
+or r21,r23
+
+/* cipher 1 */
+mov ZL, r7
+lpm r23, Z
+andi r23,0x03
+or r22,r23
+
+/* cipher0 in r21, cipher1 in r22 */
+/* We are moving to the group cipher2,cipher3 but we still use the fact that ZH=0x09 */
+
+/* cipher 2 */
+mov ZL,r0
+lpm r23,Z
+andi r23,0xC0
+
+/* cipher 3 */
+mov ZL,r4
+lpm r24,Z
+andi r24,0xC0
+
+/* cipher 2 */
+ldi ZH,0x06
+mov ZL,r1
+lpm r25,Z
+andi r25,0x30
+or r23,r25
+
+/* cipher 3 */
+mov ZL,r5
+lpm r25,Z
+andi r25,0x30
+or r24,r25
+
+/* cipher 2 */
+ldi ZH,0x07
+mov ZL,r2
+lpm r25,Z
+andi r25,0x0C
+or r23,r25
+
+/* cipher 3 */
+mov ZL,r6
+lpm r25,Z
+andi r25,0x0C
+or r24,r25
+
+/* cipher 2 */
+ldi ZH,0x08
+mov ZL,r3
+lpm r25,Z
+andi r25,0x03
+or r23,r25
+
+/* cipher 3 */
+mov ZL,r7
+lpm r25,Z
+andi r25,0x03
+or r24,r25
+
+/* cipher2,3 stored in r23, r24 */
+/* We move to cipher 4 and cipher 5 but we still use ZH=0x08 */
+
+/* cipher 4 */
+mov ZL,r0
+lpm r25,Z
+andi r25,0xC0
+
+/* cipher 5 */
+mov ZL,r4
+lpm r26,Z
+andi r26,0xC0
+
+/* cipher 4 */
+ldi ZH,0x09
+mov ZL,r1
+lpm r27,Z
+andi r27,0x30
+or r25,r27
+
+/* cipher 5 */
+mov ZL,r5
+lpm r27,Z
+andi r27,0x30
+or r26,r27
+
+/* cipher 4 */
+ldi ZH,0x06
+mov ZL,r2
+lpm r27,Z
+andi r27,0x0C
+or r25,r27
+
+/* cipher 5 */
+mov ZL,r6
+lpm r27,Z
+andi r27,0x0C
+or r26,r27
+
+/* cipher 4 */
+ldi ZH,0x07
 mov ZL,r3
 lpm r27,Z
+andi r27,0x03
+or r25,r27
 
+/* cipher 5 */
 mov ZL,r7
-/* r9 instead of r31, as mentioned above */
-lpm r9,Z
+lpm r27,Z
+andi r27,0x03
+or r26,r27
 
-/* Lookup Table 0 */
-ldi ZH, 0x09
-mov ZL,r3
-lpm r19,Z
+/* cipher 4,5 in registers r25,r26 . We continue to cipher 6,7 using ZH=0x07 */
 
-mov ZL,r7
-lpm r23,Z
-
+/* cipher 6 */
 mov ZL,r0
-lpm r24,Z
+lpm r27,Z
+andi r27,0xC0
 
+/* cipher 7 */
 mov ZL,r4
 lpm r28,Z
-
-/* Now, I no longer need Z=(r30, r31), so move r8, r9 there s.t. I can imediately and/or them in following code */
-mov r30,r8
-mov r31, r9
-
-/* The results[LOW] are stored in | r16, r17, r18, r19 | r20, r21, r22, r23 | r24, r25, r26, r27 | r28, r29, r30, r31 | */
-/* Perform the AND/OR operations to combine to a new state[LOW] */
-
-andi r16,0xC0
-andi r17,0x30
-andi r18,0x0C
-andi r19,0x03
-
-or r16,r17
-or r16,r18
-or r16,r19
-
-andi r20,0xC0
-andi r21,0x30
-andi r22,0x0C
-andi r23,0x03
-
-or r20,r21
-or r20,r22
-or r20,r23
-
-andi r24,0xC0
-andi r25,0x30
-andi r26,0x0C
-andi r27,0x03
-
-or r24,r25
-or r24,r26
-or r24,r27
-
 andi r28,0xC0
+
+/* cipher 6 */
+ldi ZH,0x08
+mov ZL,r1
+lpm r29,Z
 andi r29,0x30
-andi r30,0x0C
-andi r31,0x03
+or r27,r29
 
-or r28,r29
-or r28,r30
-or r28,r31
-
-/* The low half of the new state is stored in r16, r20, r24 , r28 
- * and we move them to the unused registers r8, r9 ,r10, r11
- */
-
- mov r8,r16
- mov r9,r20
- mov r10,r24
- mov r11,r28
-
- /* Now we are officially out of registers, do the procedure once again [modified for the high state ofc] 
- to calculate the high half of the new state */
-
- /* Lookup Table 3 */
-
- ldi ZH,0x06
- mov ZL,r2
- lpm r18,Z
-
- mov ZL,r6
- lpm r22,Z
-
- mov ZL,r3
- lpm r27,Z
-
- mov ZL,r7
- /* Instead of r31, we use r15 */
- lpm r15,Z
-
- /* Lookup Table 2 */
-
- ldi ZH,0x07
- mov ZL,r3
- lpm r19,Z
-
- mov ZL,r7
- lpm r23,Z
-
- mov ZL,r0
- lpm r24,Z
-
- mov ZL,r4
- lpm r28,Z
-
-/* Lookup Table 1 */
-
- ldi ZH,0x08
- mov ZL,r0
- lpm r16,Z
-
- mov ZL,r4
- lpm r20,Z
-
- mov ZL,r1
- lpm r25,Z
-
- mov ZL,r5
- lpm r29,Z
-
-/* Lookup Table 0 */
-
- ldi ZH,0x09
- mov ZL,r1
- lpm r17,Z
-
- mov ZL,r5
- lpm r21,Z
-
- mov ZL,r2
- lpm r26,Z
-
- mov ZL,r6
- /* Instead of r30, we use r14 */
- /* Although we don't need Z anymore, we avoid doing lpm r30, Z  [to gain 1cc] because it is UNDEFINED
-    and I'm kinda afraid - WILL CHECK AGAIN [perhaps only lpm r30,Z+ is undefined] */
- lpm r14,Z
-
- 
-/* Now, I no longer need Z=(r30, r31), so move r14, r15 there s.t. I can imediately and/or them in following code */
-mov r30,r14
-mov r31, r15
-
-/* The results[HIGH]are stored in | r16, r17, r18, r19 | r20, r21, r22, r23 | r24, r25, r26, r27 | r28, r29, r30, r31 | */
-/* Perform the AND/OR operations to combine to a new state[HIGH] */
-
-andi r16,0xC0
-andi r17,0x30
-andi r18,0x0C
-andi r19,0x03
-
-or r16,r17
-or r16,r18
-or r16,r19
-
-andi r20,0xC0
-andi r21,0x30
-andi r22,0x0C
-andi r23,0x03
-
-or r20,r21
-or r20,r22
-or r20,r23
-
-andi r24,0xC0
-andi r25,0x30
-andi r26,0x0C
-andi r27,0x03
-
-or r24,r25
-or r24,r26
-or r24,r27
-
-andi r28,0xC0
+/* cipher 7 */
+mov ZL,r5
+lpm r29,Z
 andi r29,0x30
-andi r30,0x0C
-andi r31,0x03
-
 or r28,r29
-or r28,r30
-or r28,r31
 
-/* The high half of the new state is stored in r16, r20, r24 , r28 
- * and we move them to the unused registers r12, r13 ,r14, r15
- */
+/* cipher 6 */
+ldi ZH,0x09
+mov ZL,r2
+lpm r29,Z
+andi r29,0x0C
+or r27,r29
 
- mov r12,r16
- mov r13,r20
- mov r14,r24
- mov r15,r28
+/* cipher 7 */
+mov ZL,r6
+lpm r29,Z
+andi r29,0x0C
+or r28,r29
+
+/* cipher 6 */
+ldi ZH,0x06
+mov ZL,r3
+lpm r29,Z
+andi r29,0x03
+or r27,r29
+
+/* cipher 7 */
+mov ZL,r7
+lpm r29,Z
+andi r29,0x03
+or r28,r29
 
 
- /* FINALLY, FULL new state [64 bits] is stored in r8, r9, ... , r15 */
+
+
+ /* FINALLY, FULL new state [64 bits] is stored in r21, r22, ... , r28 */
 
  /*Move the new state back to r0,r1,...,r7 - IS IT A WASTE? check again! */
 
- mov r0,r8
- mov r1,r9
- mov r2,r10
- mov r3,r11
- mov r4,r12
- mov r5,r13
- mov r6,r14
- mov r7,r15
+ mov r0,r21
+ mov r1,r22
+ mov r2,r23
+ mov r3,r24
+ mov r4,r25
+ mov r5,r26
+ mov r6,r27
+ mov r7,r28
  
- /* Key is also updated, I just need to fetch it from stack */
- pop r20 //pop the counter first
- pop r17 //reverse order 
- pop r16
- pop r15
- pop r14
- pop r13
- pop r12
- pop r11
- pop r10
- pop r9
- pop r8
+
 
  /* check if counter reached 31 */
  cpi r20,0x1F
