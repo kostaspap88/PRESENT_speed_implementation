@@ -25,10 +25,8 @@
   <sbox_pmt_1><FILE>C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_speed.asm</FILE><LINE>71</LINE></sbox_pmt_1>
   <sbox_pmt_0><FILE>C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_speed.asm</FILE><LINE>90</LINE></sbox_pmt_0>
   <sbox256><FILE>C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_speed.asm</FILE><LINE>114</LINE></sbox256>
-  <shifted_counter><FILE>C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_speed.asm</FILE><LINE>133</LINE></shifted_counter>
-  <sbox16><FILE>C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_speed.asm</FILE><LINE>138</LINE></sbox16>
-  <LOOP_BEGINNING><FILE>C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_speed.asm</FILE><LINE>234</LINE></LOOP_BEGINNING>
-  <ONE_MORE_ROUND><FILE>C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_speed.asm</FILE><LINE>611</LINE></ONE_MORE_ROUND>
-  <END><FILE>C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_speed.asm</FILE><LINE>597</LINE></END>
+  <LOOP_BEGINNING><FILE>C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_speed.asm</FILE><LINE>194</LINE></LOOP_BEGINNING>
+  <ONE_MORE_ROUND><FILE>C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_speed.asm</FILE><LINE>566</LINE></ONE_MORE_ROUND>
+  <END><FILE>C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_speed.asm</FILE><LINE>551</LINE></END>
  </LABELS>
 </ASSEMBLER_INFO>

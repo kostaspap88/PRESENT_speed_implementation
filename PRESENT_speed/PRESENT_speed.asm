@@ -106,11 +106,11 @@ sbox_pmt_0:
 .db	0x61, 0x64, 0x70, 0x35, 0x25, 0x20, 0x31, 0x65, 0x34, 0x71, 0x75, 0x21, 0x60, 0x74, 0x24, 0x30
 
 /* I also need a REGULAR SBox to input the key parts that use the SBox (and obviously I can't use the Combined S-P tables 
- * Also, I use a 256 byte SBox because it is easier to access bytes instead of 4-bit nibbles
+ * We use a 256 byte SBox because it is easier to access bytes instead of 4-bit nibbles
  * Note: only the first 4 bits are substituted each time e.g. 0x00 becomes 0xC0
  */
  //Byte address: 0x0A00
- /* Well, it's a bit extreme to do this. We could also store 0x0C, 0x05 etc. It takes less and requires one additional XOR */
+ 
 sbox256:
 .db 0xC0, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8, 0xC9, 0xCA, 0xCB, 0xCC, 0xCD, 0xCE, 0xCF
 .db 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5A, 0x5B, 0x5C, 0x5D, 0x5E, 0x5F
@@ -128,32 +128,15 @@ sbox256:
 .db 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78, 0x79, 0x7A, 0x7B, 0x7C, 0x7D, 0x7E, 0x7F
 .db 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F
 .db 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F
-/* Precomputed values for the shifted counter [counter in msb-lsb but values in lsb-msb] */
-//Byte address 0x0B00
-shifted_counter:
-.db 0x00, 0x20, 0x10, 0x30, 0x08, 0x28, 0x18, 0x38, 0x04, 0x24, 0x14, 0x34, 0x0C, 0x2C, 0x1C, 0x3C 
-.db 0x02, 0x22, 0x12, 0x32, 0x0A, 0x2A, 0x68, 0x1A, 0x06, 0x26, 0x16, 0x36, 0x0E, 0x2E, 0x1E, 0x3E
 
-/* the smaller way for the key sboxes */
-sbox16:
-//Perhaps later...
 
 
 .org 0x00
 
-/* We store the current state [64 bits] in registers r0 until r7 
-   because we only load them once and then only operate on them. */
+/* Start of program. */
 
-//BEGIN: load current state with PLAINTEXT values
-ldi r16,0x01
-ldi r17,0x02
-ldi r18,0x00
-ldi r19,0xFF
-ldi r20,0x45
-ldi r21,0x90
-ldi r22,0x33
-ldi r23,0x41
 
+//BEGIN: load current state with PLAINTEXT values e.g. 0x00
 ldi r16,0x00
 ldi r17,0x00
 ldi r18,0x00
@@ -162,7 +145,6 @@ ldi r20,0x00
 ldi r21,0x00
 ldi r22,0x00
 ldi r23,0x00
-
 
 mov r0,r16
 mov r1,r17
@@ -174,31 +156,8 @@ mov r6,r22
 mov r7,r23
 //END: load current state with PLAINTEXT values
 
-//BEGIN: Load r8,r9,...,r15,r16,r17 with a key 0x00 s.t. I test faster
+//BEGIN: Load r8,r9,...,r15,r16,r17 with a key 0x00
 
-
-ldi r16,0x01
-ldi r17,0x02
-ldi r18,0x03
-ldi r19,0x04
-ldi r20,0x05
-ldi r21,0x06
-ldi r22,0x07
-ldi r23,0x08
-ldi r24,0x09
-ldi r25,0x0A
-
-
-ldi r16,0xB5
-ldi r17,0xEB
-ldi r18,0x11
-ldi r19,0x08
-ldi r20,0xD1
-ldi r21,0x00
-ldi r22,0xAD
-ldi r23,0x98
-ldi r24,0x23
-ldi r25,0x40
 
 ldi r16,0x00
 ldi r17,0x00
@@ -223,19 +182,20 @@ mov r16,r24
 mov r17,r25
 
 //END: Load r8,r9,...,r15,r16,r17 with a key
+//End of initialization phase
 
 //BEGIN: start counter
 ldi r20,0x00
 
 //END: start counter
 
-/* Memory LSB:MSB , e.g. if state is stored in r0,...,r7 then state_LSB is leftmost bit of r0 and state_MSB is rightmost bit of r7*/
+/* Memory MSB:LSB */
 
 LOOP_BEGINNING:
 
 /* AddRoundKey: XOR the plaintext with [CARE] the leftmost 64bits of 80-bit key to create the 1st STATE*/
 
-//CHANGED!THINK AGAIN
+
 eor r0,r17
 eor r1,r16
 eor r2,r15
@@ -253,14 +213,10 @@ eor r7,r10
  */
 
  inc r20 /* Increase counter */ 
- /* To save some shifts back and forth in the counter (and to fix the silly choice for LSB-MSB :D), 
- fetch the corresponding shifted and reversed counter from table */
- //ldi ZH,0x0B
- //mov ZL,r20
-// lpm r21,Z
- //eor r12,r21
 
- /* Alternative  XOR counter*/
+ /*key XOR counter. Instead of shifts we could also precompute shifted values and store them in 
+  *lookup table
+  */
  lsl r20
  lsl r20
  eor r12,r20
@@ -353,18 +309,16 @@ mov r17,r19
 /* Finally, updated key is stored in r8,r9,r10,...,r17 */
 
 
-// Question: Is x+x better than 2*x  or than <<? 
-
-
 /* SBox and PLayer combined in LookupTables
 Technique: Load sbox_pmt table address to Z and fetch */
 
-/* CARE: In order to avoid loading to ZL the sbox_pmt_3+sbox_pmt_3 = ldi + add = 2cc,
- * we directly load the value 0x60 = 1cc .
+ 
+/* We directly load the value 0x60 = 1cc .
  * One more thing: in order to avoid loading ZH everytime we lookup elsewhere, we start the tables at 
  * address 0x0600 (so .org 0x0300 for word address) and e.g. table 3 starts at 0x0600 and ends at 0x0600+0xFF
  * Now, we only have to change ZL before looking up in the same table. We change ZH only when moving to a different table.
- * Last, in order to avoid changing ZH, we first do all table3 lookups, then all table2 lookups,...
+ * Last, in order to avoid changing ZH, we first do as many lookups from the same table as possible.
+ * With the current number of available registers, we can only combine ZH for two or tables
  */
 
 /* cipher 0 */
@@ -577,7 +531,7 @@ or r28,r29
 
  /* FINALLY, FULL new state [64 bits] is stored in r21, r22, ... , r28 */
 
- /*Move the new state back to r0,r1,...,r7 - IS IT A WASTE? check again! */
+ /* Move the new state back to r0,r1,...,r7 */
 
  mov r0,r21
  mov r1,r22
@@ -605,8 +559,9 @@ eor r5,r12
 eor r6,r11
 eor r7,r10
 //result in r0, r1, ... ,r7
- eor r31,r31
-
+ 
+ //WE REACHED THE END of the program
+ //DO NOT CONTINUE FURTHER
 
  ONE_MORE_ROUND:
  rjmp LOOP_BEGINNING

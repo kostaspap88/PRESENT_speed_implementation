@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.1.52  C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_speed.asm Thu Feb 21 19:48:42 2013
+AVRASM ver. 2.1.52  C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_speed.asm Mon Feb 25 20:18:09 2013
 
 [builtin](2): Including file 'C:\Program Files (x86)\Atmel\Atmel Studio 6.0\extensions\Atmel\AVRAssembler\2.1.51.64\AvrAssembler/Include\tn45def.inc'
 C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_speed.asm(16): Including file 'C:\Program Files (x86)\Atmel\Atmel Studio 6.0\extensions\Atmel\AVRAssembler\2.1.51.64\AvrAssembler/Include\tn45def.inc'
@@ -1289,11 +1289,11 @@ C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_sp
 0004ff 3024      .db	0x61, 0x64, 0x70, 0x35, 0x25, 0x20, 0x31, 0x65, 0x34, 0x71, 0x75, 0x21, 0x60, 0x74, 0x24, 0x30
                  
                  /* I also need a REGULAR SBox to input the key parts that use the SBox (and obviously I can't use the Combined S-P tables 
-                  * Also, I use a 256 byte SBox because it is easier to access bytes instead of 4-bit nibbles
+                  * We use a 256 byte SBox because it is easier to access bytes instead of 4-bit nibbles
                   * Note: only the first 4 bits are substituted each time e.g. 0x00 becomes 0xC0
                   */
                   //Byte address: 0x0A00
-                  /* Well, it's a bit extreme to do this. We could also store 0x0C, 0x05 etc. It takes less and requires one additional XOR */
+                  
                  sbox256:
 000500 c1c0
 000501 c3c2
@@ -1423,136 +1423,82 @@ C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_sp
 00057d 2b2a
 00057e 2d2c
 00057f 2f2e      .db 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F
-                 /* Precomputed values for the shifted counter [counter in msb-lsb but values in lsb-msb] */
-                 //Byte address 0x0B00
-                 shifted_counter:
-000580 2000
-000581 3010
-000582 2808
-000583 3818
-000584 2404
-000585 3414
-000586 2c0c
-000587 3c1c      .db 0x00, 0x20, 0x10, 0x30, 0x08, 0x28, 0x18, 0x38, 0x04, 0x24, 0x14, 0x34, 0x0C, 0x2C, 0x1C, 0x3C 
-000588 2202
-000589 3212
-00058a 2a0a
-00058b 1a68
-00058c 2606
-00058d 3616
-00058e 2e0e
-00058f 3e1e      .db 0x02, 0x22, 0x12, 0x32, 0x0A, 0x2A, 0x68, 0x1A, 0x06, 0x26, 0x16, 0x36, 0x0E, 0x2E, 0x1E, 0x3E
                  
-                 /* the smaller way for the key sboxes */
-                 sbox16:
-                 //Perhaps later...
                  
                  
                  .org 0x00
                  
-                 /* We store the current state [64 bits] in registers r0 until r7 
-                    because we only load them once and then only operate on them. */
+                 /* Start of program. */
                  
-                 //BEGIN: load current state with PLAINTEXT values
-000000 e001      ldi r16,0x01
-000001 e012      ldi r17,0x02
+                 
+                 //BEGIN: load current state with PLAINTEXT values e.g. 0x00
+000000 e000      ldi r16,0x00
+000001 e010      ldi r17,0x00
 000002 e020      ldi r18,0x00
-000003 ef3f      ldi r19,0xFF
-000004 e445      ldi r20,0x45
-000005 e950      ldi r21,0x90
-000006 e363      ldi r22,0x33
-000007 e471      ldi r23,0x41
+000003 e030      ldi r19,0x00
+000004 e040      ldi r20,0x00
+000005 e050      ldi r21,0x00
+000006 e060      ldi r22,0x00
+000007 e070      ldi r23,0x00
                  
-000008 e000      ldi r16,0x00
-000009 e010      ldi r17,0x00
-00000a e020      ldi r18,0x00
-00000b e030      ldi r19,0x00
-00000c e040      ldi r20,0x00
-00000d e050      ldi r21,0x00
-00000e e060      ldi r22,0x00
-00000f e070      ldi r23,0x00
-                 
-                 
-000010 2e00      mov r0,r16
-000011 2e11      mov r1,r17
-000012 2e22      mov r2,r18
-000013 2e33      mov r3,r19
-000014 2e44      mov r4,r20
-000015 2e55      mov r5,r21
-000016 2e66      mov r6,r22
-000017 2e77      mov r7,r23
+000008 2e00      mov r0,r16
+000009 2e11      mov r1,r17
+00000a 2e22      mov r2,r18
+00000b 2e33      mov r3,r19
+00000c 2e44      mov r4,r20
+00000d 2e55      mov r5,r21
+00000e 2e66      mov r6,r22
+00000f 2e77      mov r7,r23
                  //END: load current state with PLAINTEXT values
                  
-                 //BEGIN: Load r8,r9,...,r15,r16,r17 with a key 0x00 s.t. I test faster
+                 //BEGIN: Load r8,r9,...,r15,r16,r17 with a key 0x00
                  
                  
-000018 e001      ldi r16,0x01
-000019 e012      ldi r17,0x02
-00001a e023      ldi r18,0x03
-00001b e034      ldi r19,0x04
-00001c e045      ldi r20,0x05
-00001d e056      ldi r21,0x06
-00001e e067      ldi r22,0x07
-00001f e078      ldi r23,0x08
-000020 e089      ldi r24,0x09
-000021 e09a      ldi r25,0x0A
+000010 e000      ldi r16,0x00
+000011 e010      ldi r17,0x00
+000012 e020      ldi r18,0x00
+000013 e030      ldi r19,0x00
+000014 e040      ldi r20,0x00
+000015 e050      ldi r21,0x00
+000016 e060      ldi r22,0x00
+000017 e070      ldi r23,0x00
+000018 e080      ldi r24,0x00
+000019 e090      ldi r25,0x00
                  
-                 
-000022 eb05      ldi r16,0xB5
-000023 ee1b      ldi r17,0xEB
-000024 e121      ldi r18,0x11
-000025 e038      ldi r19,0x08
-000026 ed41      ldi r20,0xD1
-000027 e050      ldi r21,0x00
-000028 ea6d      ldi r22,0xAD
-000029 e978      ldi r23,0x98
-00002a e283      ldi r24,0x23
-00002b e490      ldi r25,0x40
-                 
-00002c e000      ldi r16,0x00
-00002d e010      ldi r17,0x00
-00002e e020      ldi r18,0x00
-00002f e030      ldi r19,0x00
-000030 e040      ldi r20,0x00
-000031 e050      ldi r21,0x00
-000032 e060      ldi r22,0x00
-000033 e070      ldi r23,0x00
-000034 e080      ldi r24,0x00
-000035 e090      ldi r25,0x00
-                 
-000036 2e80      mov r8,r16
-000037 2e91      mov r9,r17
-000038 2ea2      mov r10,r18
-000039 2eb3      mov r11,r19
-00003a 2ec4      mov r12,r20
-00003b 2ed5      mov r13,r21
-00003c 2ee6      mov r14,r22
-00003d 2ef7      mov r15,r23
-00003e 2f08      mov r16,r24
-00003f 2f19      mov r17,r25
+00001a 2e80      mov r8,r16
+00001b 2e91      mov r9,r17
+00001c 2ea2      mov r10,r18
+00001d 2eb3      mov r11,r19
+00001e 2ec4      mov r12,r20
+00001f 2ed5      mov r13,r21
+000020 2ee6      mov r14,r22
+000021 2ef7      mov r15,r23
+000022 2f08      mov r16,r24
+000023 2f19      mov r17,r25
                  
                  //END: Load r8,r9,...,r15,r16,r17 with a key
+                 //End of initialization phase
                  
                  //BEGIN: start counter
-000040 e040      ldi r20,0x00
+000024 e040      ldi r20,0x00
                  
                  //END: start counter
                  
-                 /* Memory LSB:MSB , e.g. if state is stored in r0,...,r7 then state_LSB is leftmost bit of r0 and state_MSB is rightmost bit of r7*/
+                 /* Memory MSB:LSB */
                  
                  LOOP_BEGINNING:
                  
                  /* AddRoundKey: XOR the plaintext with [CARE] the leftmost 64bits of 80-bit key to create the 1st STATE*/
                  
-                 //CHANGED!THINK AGAIN
-000041 2601      eor r0,r17
-000042 2610      eor r1,r16
-000043 242f      eor r2,r15
-000044 243e      eor r3,r14
-000045 244d      eor r4,r13
-000046 245c      eor r5,r12
-000047 246b      eor r6,r11
-000048 247a      eor r7,r10
+                 
+000025 2601      eor r0,r17
+000026 2610      eor r1,r16
+000027 242f      eor r2,r15
+000028 243e      eor r3,r14
+000029 244d      eor r4,r13
+00002a 245c      eor r5,r12
+00002b 246b      eor r6,r11
+00002c 247a      eor r7,r10
                  /* XORED STATE is in r0,r1,...,r7 */
                  
                  /* Do the KEY UPDATE and counter increase here, key is stored in r8,r9,...,r17 */
@@ -1561,364 +1507,359 @@ C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_sp
                   * because bits 15,16,17,18,19 are bits 34,35,36,37,38 which span only one byte in register r12
                   */
                  
-000049 9543       inc r20 /* Increase counter */ 
-                  /* To save some shifts back and forth in the counter (and to fix the silly choice for LSB-MSB :D), 
-                  fetch the corresponding shifted and reversed counter from table */
-                  //ldi ZH,0x0B
-                  //mov ZL,r20
-                 // lpm r21,Z
-                  //eor r12,r21
+00002d 9543       inc r20 /* Increase counter */ 
                  
-                  /* Alternative  XOR counter*/
-00004a 0f44       lsl r20
-00004b 0f44       lsl r20
-00004c 26c4       eor r12,r20
-00004d 9546       lsr r20
-00004e 9546       lsr r20
+                  /*key XOR counter. Instead of shifts we could also precompute shifted values and store them in 
+                   *lookup table
+                   */
+00002e 0f44       lsl r20
+00002f 0f44       lsl r20
+000030 26c4       eor r12,r20
+000031 9546       lsr r20
+000032 9546       lsr r20
                  
                  /* 61 rotations to left = 19 rotations to the right = 2*(8bit moves) + 3 bit rotation right */
                  
                  /* 2*8 bit rotation is done easily with mov */
-00004f 2d28      mov r18,r8
-000050 2d39      mov r19,r9
+000033 2d28      mov r18,r8
+000034 2d39      mov r19,r9
                  /* key is stored in r10, r11, ... ,r19 */
                  /* Perform 3 rotations to the right */
                  
                  /* 1st rotation */
                  /* clear r9 which will work as a temp */
-000051 2499      eor r9,r9
+000035 2499      eor r9,r9
                  
-000052 9536      lsr r19
-000053 9527      ror r18
-000054 9517      ror r17
-000055 9507      ror r16
-000056 94f7      ror r15
-000057 94e7      ror r14
-000058 94d7      ror r13
-000059 94c7      ror r12
-00005a 94b7      ror r11
-00005b 94a7      ror r10
+000036 9536      lsr r19
+000037 9527      ror r18
+000038 9517      ror r17
+000039 9507      ror r16
+00003a 94f7      ror r15
+00003b 94e7      ror r14
+00003c 94d7      ror r13
+00003d 94c7      ror r12
+00003e 94b7      ror r11
+00003f 94a7      ror r10
                  
-00005c 9497      ror r9
-00005d 2939      or r19,r9
+000040 9497      ror r9
+000041 2939      or r19,r9
                  
                  /* 2nd rotation - keep the thing unrolled :D */
-00005e 2499      eor r9,r9
+000042 2499      eor r9,r9
                  
-00005f 9536      lsr r19
-000060 9527      ror r18
-000061 9517      ror r17
-000062 9507      ror r16
-000063 94f7      ror r15
-000064 94e7      ror r14
-000065 94d7      ror r13
-000066 94c7      ror r12
-000067 94b7      ror r11
-000068 94a7      ror r10
+000043 9536      lsr r19
+000044 9527      ror r18
+000045 9517      ror r17
+000046 9507      ror r16
+000047 94f7      ror r15
+000048 94e7      ror r14
+000049 94d7      ror r13
+00004a 94c7      ror r12
+00004b 94b7      ror r11
+00004c 94a7      ror r10
                  
-000069 9497      ror r9
-00006a 2939      or r19,r9
+00004d 9497      ror r9
+00004e 2939      or r19,r9
                  
                  /* 3rd rotation */
                  
-00006b 2499      eor r9,r9
+00004f 2499      eor r9,r9
                  
-00006c 9536      lsr r19
-00006d 9527      ror r18
-00006e 9517      ror r17
-00006f 9507      ror r16
-000070 94f7      ror r15
-000071 94e7      ror r14
-000072 94d7      ror r13
-000073 94c7      ror r12
-000074 94b7      ror r11
-000075 94a7      ror r10
+000050 9536      lsr r19
+000051 9527      ror r18
+000052 9517      ror r17
+000053 9507      ror r16
+000054 94f7      ror r15
+000055 94e7      ror r14
+000056 94d7      ror r13
+000057 94c7      ror r12
+000058 94b7      ror r11
+000059 94a7      ror r10
                  
-000076 9497      ror r9
-000077 2939      or r19,r9
+00005a 9497      ror r9
+00005b 2939      or r19,r9
                  
                  
                  
                  /* SBox on key bits 76,77,78,79 i.e. high part of register r19 */
-000078 e0fa      ldi ZH, 0x0A
-000079 2fe3      mov ZL,r19
-00007a 9134      lpm r19,Z
+00005c e0fa      ldi ZH, 0x0A
+00005d 2fe3      mov ZL,r19
+00005e 9134      lpm r19,Z
                  
                  
                  /* key is stored in r10, r11, ... ,r19. I should probably move it back to r8,r9,r10,....,r17 */
-00007b 2c8a      mov r8,r10
-00007c 2c9b      mov r9,r11
-00007d 2cac      mov r10,r12
-00007e 2cbd      mov r11,r13
-00007f 2cce      mov r12,r14
-000080 2cdf      mov r13,r15
-000081 2ee0      mov r14,r16
-000082 2ef1      mov r15,r17
-000083 2f02      mov r16,r18
-000084 2f13      mov r17,r19
+00005f 2c8a      mov r8,r10
+000060 2c9b      mov r9,r11
+000061 2cac      mov r10,r12
+000062 2cbd      mov r11,r13
+000063 2cce      mov r12,r14
+000064 2cdf      mov r13,r15
+000065 2ee0      mov r14,r16
+000066 2ef1      mov r15,r17
+000067 2f02      mov r16,r18
+000068 2f13      mov r17,r19
                  
                  
                  
                  /* Finally, updated key is stored in r8,r9,r10,...,r17 */
                  
                  
-                 // Question: Is x+x better than 2*x  or than <<? 
-                 
-                 
                  /* SBox and PLayer combined in LookupTables
                  Technique: Load sbox_pmt table address to Z and fetch */
                  
-                 /* CARE: In order to avoid loading to ZL the sbox_pmt_3+sbox_pmt_3 = ldi + add = 2cc,
-                  * we directly load the value 0x60 = 1cc .
+                  
+                 /* We directly load the value 0x60 = 1cc .
                   * One more thing: in order to avoid loading ZH everytime we lookup elsewhere, we start the tables at 
                   * address 0x0600 (so .org 0x0300 for word address) and e.g. table 3 starts at 0x0600 and ends at 0x0600+0xFF
                   * Now, we only have to change ZL before looking up in the same table. We change ZH only when moving to a different table.
-                  * Last, in order to avoid changing ZH, we first do all table3 lookups, then all table2 lookups,...
+                  * Last, in order to avoid changing ZH, we first do as many lookups from the same table as possible.
+                  * With the current number of available registers, we can only combine ZH for two or tables
                   */
                  
                  /* cipher 0 */
-000085 e0f6      ldi ZH, 0x06
-000086 2de0      mov ZL, r0
-000087 9154      lpm r21, Z
-000088 7c50      andi r21,0xC0
+000069 e0f6      ldi ZH, 0x06
+00006a 2de0      mov ZL, r0
+00006b 9154      lpm r21, Z
+00006c 7c50      andi r21,0xC0
                  
                  /* cipher 1 - use the ZH=0x06 */ 
-000089 2de4      mov ZL, r4
-00008a 9164      lpm r22, Z
-00008b 7c60      andi r22,0xC0
+00006d 2de4      mov ZL, r4
+00006e 9164      lpm r22, Z
+00006f 7c60      andi r22,0xC0
                  
                  /* cipher 0 */
-00008c e0f7      ldi ZH, 0x07
-00008d 2de1      mov ZL, r1
-00008e 9174      lpm r23, Z
-00008f 7370      andi r23,0x30
-000090 2b57      or r21,r23
+000070 e0f7      ldi ZH, 0x07
+000071 2de1      mov ZL, r1
+000072 9174      lpm r23, Z
+000073 7370      andi r23,0x30
+000074 2b57      or r21,r23
                  
                  /* cipher 1 */
-000091 2de5      mov ZL, r5
-000092 9174      lpm r23, Z
-000093 7370      andi r23,0x30
-000094 2b67      or r22,r23
+000075 2de5      mov ZL, r5
+000076 9174      lpm r23, Z
+000077 7370      andi r23,0x30
+000078 2b67      or r22,r23
                  
                  /* cipher 0 */
-000095 e0f8      ldi ZH, 0x08
-000096 2de2      mov ZL, r2
-000097 9174      lpm r23, Z
-000098 707c      andi r23,0x0C
-000099 2b57      or r21,r23
+000079 e0f8      ldi ZH, 0x08
+00007a 2de2      mov ZL, r2
+00007b 9174      lpm r23, Z
+00007c 707c      andi r23,0x0C
+00007d 2b57      or r21,r23
                  
                  /* cipher 1 */
-00009a 2de6      mov ZL, r6
-00009b 9174      lpm r23, Z
-00009c 707c      andi r23,0x0C
-00009d 2b67      or r22,r23
+00007e 2de6      mov ZL, r6
+00007f 9174      lpm r23, Z
+000080 707c      andi r23,0x0C
+000081 2b67      or r22,r23
                  
                  /* cipher 0 */
-00009e e0f9      ldi ZH, 0x09
-00009f 2de3      mov ZL, r3
-0000a0 9174      lpm r23, Z
-0000a1 7073      andi r23,0x03
-0000a2 2b57      or r21,r23
+000082 e0f9      ldi ZH, 0x09
+000083 2de3      mov ZL, r3
+000084 9174      lpm r23, Z
+000085 7073      andi r23,0x03
+000086 2b57      or r21,r23
                  
                  /* cipher 1 */
-0000a3 2de7      mov ZL, r7
-0000a4 9174      lpm r23, Z
-0000a5 7073      andi r23,0x03
-0000a6 2b67      or r22,r23
+000087 2de7      mov ZL, r7
+000088 9174      lpm r23, Z
+000089 7073      andi r23,0x03
+00008a 2b67      or r22,r23
                  
                  /* cipher0 in r21, cipher1 in r22 */
                  /* We are moving to the group cipher2,cipher3 but we still use the fact that ZH=0x09 */
                  
                  /* cipher 2 */
-0000a7 2de0      mov ZL,r0
-0000a8 9174      lpm r23,Z
-0000a9 7c70      andi r23,0xC0
+00008b 2de0      mov ZL,r0
+00008c 9174      lpm r23,Z
+00008d 7c70      andi r23,0xC0
                  
                  /* cipher 3 */
-0000aa 2de4      mov ZL,r4
-0000ab 9184      lpm r24,Z
-0000ac 7c80      andi r24,0xC0
+00008e 2de4      mov ZL,r4
+00008f 9184      lpm r24,Z
+000090 7c80      andi r24,0xC0
                  
                  /* cipher 2 */
-0000ad e0f6      ldi ZH,0x06
-0000ae 2de1      mov ZL,r1
-0000af 9194      lpm r25,Z
-0000b0 7390      andi r25,0x30
-0000b1 2b79      or r23,r25
+000091 e0f6      ldi ZH,0x06
+000092 2de1      mov ZL,r1
+000093 9194      lpm r25,Z
+000094 7390      andi r25,0x30
+000095 2b79      or r23,r25
                  
                  /* cipher 3 */
-0000b2 2de5      mov ZL,r5
-0000b3 9194      lpm r25,Z
-0000b4 7390      andi r25,0x30
-0000b5 2b89      or r24,r25
+000096 2de5      mov ZL,r5
+000097 9194      lpm r25,Z
+000098 7390      andi r25,0x30
+000099 2b89      or r24,r25
                  
                  /* cipher 2 */
-0000b6 e0f7      ldi ZH,0x07
-0000b7 2de2      mov ZL,r2
-0000b8 9194      lpm r25,Z
-0000b9 709c      andi r25,0x0C
-0000ba 2b79      or r23,r25
+00009a e0f7      ldi ZH,0x07
+00009b 2de2      mov ZL,r2
+00009c 9194      lpm r25,Z
+00009d 709c      andi r25,0x0C
+00009e 2b79      or r23,r25
                  
                  /* cipher 3 */
-0000bb 2de6      mov ZL,r6
-0000bc 9194      lpm r25,Z
-0000bd 709c      andi r25,0x0C
-0000be 2b89      or r24,r25
+00009f 2de6      mov ZL,r6
+0000a0 9194      lpm r25,Z
+0000a1 709c      andi r25,0x0C
+0000a2 2b89      or r24,r25
                  
                  /* cipher 2 */
-0000bf e0f8      ldi ZH,0x08
-0000c0 2de3      mov ZL,r3
-0000c1 9194      lpm r25,Z
-0000c2 7093      andi r25,0x03
-0000c3 2b79      or r23,r25
+0000a3 e0f8      ldi ZH,0x08
+0000a4 2de3      mov ZL,r3
+0000a5 9194      lpm r25,Z
+0000a6 7093      andi r25,0x03
+0000a7 2b79      or r23,r25
                  
                  /* cipher 3 */
-0000c4 2de7      mov ZL,r7
-0000c5 9194      lpm r25,Z
-0000c6 7093      andi r25,0x03
-0000c7 2b89      or r24,r25
+0000a8 2de7      mov ZL,r7
+0000a9 9194      lpm r25,Z
+0000aa 7093      andi r25,0x03
+0000ab 2b89      or r24,r25
                  
                  /* cipher2,3 stored in r23, r24 */
                  /* We move to cipher 4 and cipher 5 but we still use ZH=0x08 */
                  
                  /* cipher 4 */
-0000c8 2de0      mov ZL,r0
-0000c9 9194      lpm r25,Z
-0000ca 7c90      andi r25,0xC0
+0000ac 2de0      mov ZL,r0
+0000ad 9194      lpm r25,Z
+0000ae 7c90      andi r25,0xC0
                  
                  /* cipher 5 */
-0000cb 2de4      mov ZL,r4
-0000cc 91a4      lpm r26,Z
-0000cd 7ca0      andi r26,0xC0
+0000af 2de4      mov ZL,r4
+0000b0 91a4      lpm r26,Z
+0000b1 7ca0      andi r26,0xC0
                  
                  /* cipher 4 */
-0000ce e0f9      ldi ZH,0x09
-0000cf 2de1      mov ZL,r1
-0000d0 91b4      lpm r27,Z
-0000d1 73b0      andi r27,0x30
-0000d2 2b9b      or r25,r27
+0000b2 e0f9      ldi ZH,0x09
+0000b3 2de1      mov ZL,r1
+0000b4 91b4      lpm r27,Z
+0000b5 73b0      andi r27,0x30
+0000b6 2b9b      or r25,r27
                  
                  /* cipher 5 */
-0000d3 2de5      mov ZL,r5
-0000d4 91b4      lpm r27,Z
-0000d5 73b0      andi r27,0x30
-0000d6 2bab      or r26,r27
+0000b7 2de5      mov ZL,r5
+0000b8 91b4      lpm r27,Z
+0000b9 73b0      andi r27,0x30
+0000ba 2bab      or r26,r27
                  
                  /* cipher 4 */
-0000d7 e0f6      ldi ZH,0x06
-0000d8 2de2      mov ZL,r2
-0000d9 91b4      lpm r27,Z
-0000da 70bc      andi r27,0x0C
-0000db 2b9b      or r25,r27
+0000bb e0f6      ldi ZH,0x06
+0000bc 2de2      mov ZL,r2
+0000bd 91b4      lpm r27,Z
+0000be 70bc      andi r27,0x0C
+0000bf 2b9b      or r25,r27
                  
                  /* cipher 5 */
-0000dc 2de6      mov ZL,r6
-0000dd 91b4      lpm r27,Z
-0000de 70bc      andi r27,0x0C
-0000df 2bab      or r26,r27
+0000c0 2de6      mov ZL,r6
+0000c1 91b4      lpm r27,Z
+0000c2 70bc      andi r27,0x0C
+0000c3 2bab      or r26,r27
                  
                  /* cipher 4 */
-0000e0 e0f7      ldi ZH,0x07
-0000e1 2de3      mov ZL,r3
-0000e2 91b4      lpm r27,Z
-0000e3 70b3      andi r27,0x03
-0000e4 2b9b      or r25,r27
+0000c4 e0f7      ldi ZH,0x07
+0000c5 2de3      mov ZL,r3
+0000c6 91b4      lpm r27,Z
+0000c7 70b3      andi r27,0x03
+0000c8 2b9b      or r25,r27
                  
                  /* cipher 5 */
-0000e5 2de7      mov ZL,r7
-0000e6 91b4      lpm r27,Z
-0000e7 70b3      andi r27,0x03
-0000e8 2bab      or r26,r27
+0000c9 2de7      mov ZL,r7
+0000ca 91b4      lpm r27,Z
+0000cb 70b3      andi r27,0x03
+0000cc 2bab      or r26,r27
                  
                  /* cipher 4,5 in registers r25,r26 . We continue to cipher 6,7 using ZH=0x07 */
                  
                  /* cipher 6 */
-0000e9 2de0      mov ZL,r0
-0000ea 91b4      lpm r27,Z
-0000eb 7cb0      andi r27,0xC0
+0000cd 2de0      mov ZL,r0
+0000ce 91b4      lpm r27,Z
+0000cf 7cb0      andi r27,0xC0
                  
                  /* cipher 7 */
-0000ec 2de4      mov ZL,r4
-0000ed 91c4      lpm r28,Z
-0000ee 7cc0      andi r28,0xC0
+0000d0 2de4      mov ZL,r4
+0000d1 91c4      lpm r28,Z
+0000d2 7cc0      andi r28,0xC0
                  
                  /* cipher 6 */
-0000ef e0f8      ldi ZH,0x08
-0000f0 2de1      mov ZL,r1
-0000f1 91d4      lpm r29,Z
-0000f2 73d0      andi r29,0x30
-0000f3 2bbd      or r27,r29
+0000d3 e0f8      ldi ZH,0x08
+0000d4 2de1      mov ZL,r1
+0000d5 91d4      lpm r29,Z
+0000d6 73d0      andi r29,0x30
+0000d7 2bbd      or r27,r29
                  
                  /* cipher 7 */
-0000f4 2de5      mov ZL,r5
-0000f5 91d4      lpm r29,Z
-0000f6 73d0      andi r29,0x30
-0000f7 2bcd      or r28,r29
+0000d8 2de5      mov ZL,r5
+0000d9 91d4      lpm r29,Z
+0000da 73d0      andi r29,0x30
+0000db 2bcd      or r28,r29
                  
                  /* cipher 6 */
-0000f8 e0f9      ldi ZH,0x09
-0000f9 2de2      mov ZL,r2
-0000fa 91d4      lpm r29,Z
-0000fb 70dc      andi r29,0x0C
-0000fc 2bbd      or r27,r29
+0000dc e0f9      ldi ZH,0x09
+0000dd 2de2      mov ZL,r2
+0000de 91d4      lpm r29,Z
+0000df 70dc      andi r29,0x0C
+0000e0 2bbd      or r27,r29
                  
                  /* cipher 7 */
-0000fd 2de6      mov ZL,r6
-0000fe 91d4      lpm r29,Z
-0000ff 70dc      andi r29,0x0C
-000100 2bcd      or r28,r29
+0000e1 2de6      mov ZL,r6
+0000e2 91d4      lpm r29,Z
+0000e3 70dc      andi r29,0x0C
+0000e4 2bcd      or r28,r29
                  
                  /* cipher 6 */
-000101 e0f6      ldi ZH,0x06
-000102 2de3      mov ZL,r3
-000103 91d4      lpm r29,Z
-000104 70d3      andi r29,0x03
-000105 2bbd      or r27,r29
+0000e5 e0f6      ldi ZH,0x06
+0000e6 2de3      mov ZL,r3
+0000e7 91d4      lpm r29,Z
+0000e8 70d3      andi r29,0x03
+0000e9 2bbd      or r27,r29
                  
                  /* cipher 7 */
-000106 2de7      mov ZL,r7
-000107 91d4      lpm r29,Z
-000108 70d3      andi r29,0x03
-000109 2bcd      or r28,r29
+0000ea 2de7      mov ZL,r7
+0000eb 91d4      lpm r29,Z
+0000ec 70d3      andi r29,0x03
+0000ed 2bcd      or r28,r29
                  
                  
                  
                  
                   /* FINALLY, FULL new state [64 bits] is stored in r21, r22, ... , r28 */
                  
-                  /*Move the new state back to r0,r1,...,r7 - IS IT A WASTE? check again! */
+                  /* Move the new state back to r0,r1,...,r7 */
                  
-00010a 2e05       mov r0,r21
-00010b 2e16       mov r1,r22
-00010c 2e27       mov r2,r23
-00010d 2e38       mov r3,r24
-00010e 2e49       mov r4,r25
-00010f 2e5a       mov r5,r26
-000110 2e6b       mov r6,r27
-000111 2e7c       mov r7,r28
+0000ee 2e05       mov r0,r21
+0000ef 2e16       mov r1,r22
+0000f0 2e27       mov r2,r23
+0000f1 2e38       mov r3,r24
+0000f2 2e49       mov r4,r25
+0000f3 2e5a       mov r5,r26
+0000f4 2e6b       mov r6,r27
+0000f5 2e7c       mov r7,r28
                   
                  
                  
                   /* check if counter reached 31 */
-000112 314f       cpi r20,0x1F
-000113 f449       brne ONE_MORE_ROUND
+0000f6 314f       cpi r20,0x1F
+0000f7 f441       brne ONE_MORE_ROUND
                  
                   END:
                  
-000114 2601      eor r0,r17
-000115 2610      eor r1,r16
-000116 242f      eor r2,r15
-000117 243e      eor r3,r14
-000118 244d      eor r4,r13
-000119 245c      eor r5,r12
-00011a 246b      eor r6,r11
-00011b 247a      eor r7,r10
+0000f8 2601      eor r0,r17
+0000f9 2610      eor r1,r16
+0000fa 242f      eor r2,r15
+0000fb 243e      eor r3,r14
+0000fc 244d      eor r4,r13
+0000fd 245c      eor r5,r12
+0000fe 246b      eor r6,r11
+0000ff 247a      eor r7,r10
                  //result in r0, r1, ... ,r7
-00011c 27ff       eor r31,r31
+                  
+                  //WE REACHED THE END of the program
                  
                  
                   ONE_MORE_ROUND:
-00011d cf23       rjmp LOOP_BEGINNING
+000100 cf24       rjmp LOOP_BEGINNING
                  
 
 
@@ -1939,8 +1880,8 @@ counted separately from r26..r31 here.
 "ATtiny45" register use summary:
 r0 :   8 r1 :   8 r2 :   8 r3 :   8 r4 :   8 r5 :   8 r6 :   8 r7 :   8 
 r8 :   3 r9 :  15 r10:   8 r11:   8 r12:   9 r13:   8 r14:   8 r15:   8 
-r16:  15 r17:  15 r18:  12 r19:  17 r20:  15 r21:  13 r22:  13 r23:  31 
-r24:  10 r25:  28 r26:   6 r27:  24 r28:   6 r29:  18 r30:  33 r31:  16 
+r16:  12 r17:  12 r18:   9 r19:  14 r20:  12 r21:  10 r22:  10 r23:  28 
+r24:   8 r25:  26 r26:   6 r27:  24 r28:   6 r29:  18 r30:  33 r31:  14 
 x  :   0 y  :   0 z  :  33 
 Registers used: 33 out of 35 (94.3%)
 
@@ -1953,8 +1894,8 @@ brne  :   1 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0
 brvs  :   0 bset  :   0 bst   :   0 cbi   :   0 cbr   :   0 clc   :   0 
 clh   :   0 cli   :   0 cln   :   0 clr   :   0 cls   :   0 clt   :   0 
 clv   :   0 clz   :   0 com   :   0 cp    :   0 cpc   :   0 cpi   :   1 
-cpse  :   0 dec   :   0 eor   :  21 icall :   0 ijmp  :   0 in    :   0 
-inc   :   1 ld    :   0 ldd   :   0 ldi   :  61 lds   :   0 lpm   :  66 
+cpse  :   0 dec   :   0 eor   :  20 icall :   0 ijmp  :   0 in    :   0 
+inc   :   1 ld    :   0 ldd   :   0 ldi   :  33 lds   :   0 lpm   :  66 
 lsl   :   2 lsr   :   5 mov   :  71 movw  :   0 neg   :   0 nop   :   0 
 or    :  27 ori   :   0 out   :   0 pop   :   0 push  :   0 rcall :   0 
 ret   :   0 reti  :   0 rjmp  :   1 rol   :   0 ror   :  30 sbc   :   0 
@@ -1968,7 +1909,7 @@ Instructions used: 13 out of 105 (12.4%)
 "ATtiny45" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x000b20    572   1312   1884    4096  46.0%
+[.cseg] 0x000000 0x000b00    514   1280   1794    4096  43.8%
 [.dseg] 0x000060 0x000060      0      0      0     256   0.0%
 [.eseg] 0x000000 0x000000      0      0      0     256   0.0%
 
