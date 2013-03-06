@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.1.52  C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_speed.asm Mon Feb 25 20:18:09 2013
+AVRASM ver. 2.1.52  C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_speed.asm Wed Feb 27 16:05:36 2013
 
 [builtin](2): Including file 'C:\Program Files (x86)\Atmel\Atmel Studio 6.0\extensions\Atmel\AVRAssembler\2.1.51.64\AvrAssembler/Include\tn45def.inc'
 C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_speed.asm(16): Including file 'C:\Program Files (x86)\Atmel\Atmel Studio 6.0\extensions\Atmel\AVRAssembler\2.1.51.64\AvrAssembler/Include\tn45def.inc'
@@ -1559,7 +1559,7 @@ C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_sp
 00004c 94a7      ror r10
                  
 00004d 9497      ror r9
-00004e 2939      or r19,r9
+00004e 2939      or r19,r9 // think about addc and not use r9
                  
                  /* 3rd rotation */
                  
@@ -1852,11 +1852,11 @@ C:\Users\airwizard\Documents\Atmel Studio\PRESENT_speed\PRESENT_speed\PRESENT_sp
 0000fc 244d      eor r4,r13
 0000fd 245c      eor r5,r12
 0000fe 246b      eor r6,r11
-0000ff 247a      eor r7,r10
+0000ff 247a      eor r7,r10 
                  //result in r0, r1, ... ,r7
                   
                   //WE REACHED THE END of the program
-                 
+                  //DO NOT CONTINUE FURTHER
                  
                   ONE_MORE_ROUND:
 000100 cf24       rjmp LOOP_BEGINNING

@@ -264,7 +264,7 @@ ror r11
 ror r10
 
 ror r9
-or r19,r9
+or r19,r9 // think about addc and not use r9
 
 /* 3rd rotation */
 
@@ -557,7 +557,7 @@ eor r3,r14
 eor r4,r13
 eor r5,r12
 eor r6,r11
-eor r7,r10
+eor r7,r10 
 //result in r0, r1, ... ,r7
  
  //WE REACHED THE END of the program
